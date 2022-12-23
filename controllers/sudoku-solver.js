@@ -1,9 +1,12 @@
 class SudokuSolver {
   validate(puzzleString) {
     // check length of puzzle string
-    if (puzzleString.length != 81) return false; // may need to return specific issue
+    if (puzzleString.length != 81)
+      return { error: "Expected puzzle to be 81 characters long" };
     // check if any characters are not valid
     const invalidSudokuVal = /[^1-9|\.]/g;
+    if (invalidSudokuVal.test(puzzleString))
+      return { error: "Invalid characters in puzzle" };
     return !invalidSudokuVal.test(puzzleString); // may need to return specific issue
 
     // Also need to validate if string entry is valid (doubles in row/col/square...) ?
@@ -116,7 +119,9 @@ class SudokuSolver {
 
   // validate and solve puzzle
   solve(puzzleString) {
-    if (!this.validate(puzzleString)) return "invalid board";
+    let isValid = this.validate(puzzleString);
+    if (isValid != true) return this.validate(puzzleString);
+    // if (this.validate(puzzleString != true)) return "invalid board";
     else {
       let puzzleMatrix = this.generateMatrix(puzzleString);
       return this.solvePuzzle(puzzleMatrix, 0, 0);
@@ -125,7 +130,7 @@ class SudokuSolver {
 
   // solve logic function
   solvePuzzle(puzzleMatrix, row, col) {
-    console.log(`Checking cell [${row + 1},${col + 1}]`);
+    // console.log(`Checking cell [${row + 1},${col + 1}]`);
     let solutionMatrix = puzzleMatrix;
     // let solutionMatrix = puzzleMatrix.map((row) => [...row]); // this causes an infinite loop
     // reset col when we reach the end of the matrix cols
@@ -206,13 +211,16 @@ let solver = new SudokuSolver();
 //     1
 //   )}`
 // );
-console.log(
-  solver.generateSolutionString(
-    solver.solve(
-      "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6.."
-    )
-  )
-);
+// console.log(
+//   solver.solve(
+//     "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9..a....1945....4.37.4.3..6.."
+//   )
+// );
 // console.log(solver.solve(testStrings[0]));
+// console.log(
+//   solver.validate(
+//     "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9...a..1945....4.37.4.3..6.."
+//   ).error == "Invalid characters in puzzle"
+// );
 module.exports = SudokuSolver;
 //
