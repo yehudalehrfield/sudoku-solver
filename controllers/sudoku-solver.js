@@ -1,12 +1,12 @@
 class SudokuSolver {
   validate(puzzleString) {
     // check length of puzzle string
-    if (puzzleString.length != 81)
-      return { error: "Expected puzzle to be 81 characters long" };
-    // check if any characters are not valid
     const invalidSudokuVal = /[^1-9|\.]/g;
     if (invalidSudokuVal.test(puzzleString))
       return { error: "Invalid characters in puzzle" };
+    if (puzzleString.length != 81)
+      return { error: "Expected puzzle to be 81 characters long" };
+    // check if any characters are not valid
     return !invalidSudokuVal.test(puzzleString); // may need to return specific issue
 
     // Also need to validate if string entry is valid (doubles in row/col/square...) ?
@@ -17,7 +17,7 @@ class SudokuSolver {
   }
 
   // FUTURE: Combine the six check function into three (?)
-  // Check valid row entry form puzzle matrix
+  // Check valid row entry form puzzle matrix (0-based index)
   checkRow(puzzleMatrix, row, val) {
     // console.log(`Row #${row + 1}: ${puzzleMatrix[row]}`);
     // if (puzzleMatrix[row].indexOf(val.toString()) < 0) return true;
@@ -27,7 +27,7 @@ class SudokuSolver {
     }
     return true;
   }
-  // Check valid column entry form puzzle matrix
+  // Check valid column entry form puzzle matrix (0-based index)
   checkCol(puzzleMatrix, col, val) {
     // let colVals = [];
     // puzzleMatrix.forEach((elem) => colVals.push(elem[col]));
@@ -38,14 +38,14 @@ class SudokuSolver {
     }
     return true;
   }
-  // Check valid region entry form puzzle matrix
+  // Check valid region entry form puzzle matrix (0-based index)
   checkRegion(puzzleMatrix, row, col, val) {
     let rowIdx = Math.floor(row / 3) * 3;
     let colIdx = Math.floor(col / 3) * 3;
-    // let regionVals = [];
+    let regionVals = [];
     for (let i = rowIdx; i < rowIdx + 3; i++) {
       for (let j = colIdx; j < colIdx + 3; j++) {
-        // regionVals.push(puzzleMatrix[i][j]);
+        regionVals.push(puzzleMatrix[i][j]);
         if (puzzleMatrix[i][j] == val) return false;
       }
     }
@@ -55,7 +55,7 @@ class SudokuSolver {
     // else return puzzleMatrix[row][col] == val.toString();
   }
 
-  //Check row validation straight from puzzle string
+  //Check row validation straight from puzzle string (1-based index)
   checkRowPlacement(puzzleString, row, column, value) {
     let rowStartIndex = (row - 1) * 9;
     let rowEndIndex = 2 * 9 - 1;
@@ -64,7 +64,7 @@ class SudokuSolver {
     else return column == rowVals.indexOf(value) + 1;
   }
 
-  //Check col validation straight from puzzle string
+  //Check col validation straight from puzzle string (1-based index)
   checkColPlacement(puzzleString, row, column, value) {
     let colVals = puzzleString
       .split("")
@@ -78,17 +78,18 @@ class SudokuSolver {
     }
   }
 
-  //Check region validation straight from puzzle string
+  //Check region validation straight from puzzle string (1-based index)
   checkRegionPlacement(puzzleString, row, column, value) {
     // determine (top left) coordinates of the square
-    let rowIdx = Math.floor(row / 3) * 3;
-    let colIdx = Math.floor(column / 3) * 3;
+    let rowIdx = Math.floor((row - 1) / 3) * 3;
+    let colIdx = Math.floor((column - 1) / 3) * 3;
 
     // clear and set up matrix
     let sudokuMatrix = [];
     for (let i = 0; i < 9; i++) {
       sudokuMatrix.push(puzzleString.slice(i * 9, i * 9 + 9).split(""));
     }
+    // console.log(sudokuMatrix);
     let regionVals = [];
     for (let i = rowIdx; i < rowIdx + 3; i++) {
       for (let j = colIdx; j < colIdx + 3; j++) {
@@ -112,7 +113,7 @@ class SudokuSolver {
   generateSolutionString(solutionMatrix) {
     let solutionString = "";
     for (let i = 0; i < 9; i++) {
-      solutionString += solutionMatrix[0].join("");
+      solutionString += solutionMatrix[i].join("");
     }
     return solutionString;
   }
@@ -124,7 +125,15 @@ class SudokuSolver {
     // if (this.validate(puzzleString != true)) return "invalid board";
     else {
       let puzzleMatrix = this.generateMatrix(puzzleString);
-      return this.solvePuzzle(puzzleMatrix, 0, 0);
+      let solution = this.solvePuzzle(puzzleMatrix, 0, 0);
+      return (
+        // this.solvePuzzle(puzzleMatrix, 0, 0) || {
+        //   error: "Puzzle cannot be solved",
+        // }
+        solution
+          ? { solution: this.generateSolutionString(solution) }
+          : { error: "Puzzle cannot be solved" }
+      );
     }
   }
 
@@ -141,8 +150,6 @@ class SudokuSolver {
 
     // return the matrix when we reach the end of the matrix rows
     if (row == 9) {
-      console.log("--------");
-      console.log("SOLUTION:");
       return solutionMatrix;
     }
 
@@ -172,6 +179,9 @@ let testStrings = [
   ".234567891.345678912.456789123.567891234.678912345.789123456.891234567.912345678.",
   ".111111112.222222233.333333444.444445555.555566666.666777777.778888888.899999999.",
   ".231.312.456456456789789789123123123.564.645.789789789123123123456456456.897.978.",
+  "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..",
+  "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3a.6..",
+  "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9.....1945....4.37.4.3..6..",
 ];
 let solver = new SudokuSolver();
 // testStrings.forEach((elem, i) => {
@@ -184,9 +194,9 @@ let solver = new SudokuSolver();
 // console.log(
 //   `Col Validation: ${solver.checkColPlacement(testStrings[1], 4, 2, 1)}`
 // );
-// console.log(
-//   `Region Validation: ${solver.checkRegionPlacement(testStrings[2], 8, 4, 1)}`
-// );
+console.log(
+  `Region Validation: ${solver.checkRegionPlacement(testStrings[3], 9, 9, 9)}`
+);
 // console.log(
 //   `Matrix Row Validation: ${solver.checkRow(
 //     solver.generateMatrix(testStrings[0]),
@@ -203,20 +213,20 @@ let solver = new SudokuSolver();
 //     1
 //   )}`
 // );
-// console.log(
-//   `Check Matrix Region Validation: ${solver.checkRegion(
-//     solver.generateMatrix(testStrings[2]),
-//     7,
-//     3,
-//     1
-//   )}`
-// );
+console.log(
+  `Check Matrix Region Validation: ${solver.checkRegion(
+    solver.generateMatrix(testStrings[3]),
+    8,
+    8,
+    9
+  )}`
+);
 // console.log(
 //   solver.solve(
 //     "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9..a....1945....4.37.4.3..6.."
 //   )
 // );
-// console.log(solver.solve(testStrings[0]));
+// console.log(solver.solve(testStrings[3]));
 // console.log(
 //   solver.validate(
 //     "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9...a..1945....4.37.4.3..6.."
