@@ -194,9 +194,9 @@ let solver = new SudokuSolver();
 // console.log(
 //   `Col Validation: ${solver.checkColPlacement(testStrings[1], 4, 2, 1)}`
 // );
-console.log(
-  `Region Validation: ${solver.checkRegionPlacement(testStrings[3], 9, 9, 9)}`
-);
+// console.log(
+//   `Region Validation: ${solver.checkRegionPlacement(testStrings[3], 9, 9, 9)}`
+// );
 // console.log(
 //   `Matrix Row Validation: ${solver.checkRow(
 //     solver.generateMatrix(testStrings[0]),
@@ -213,14 +213,14 @@ console.log(
 //     1
 //   )}`
 // );
-console.log(
-  `Check Matrix Region Validation: ${solver.checkRegion(
-    solver.generateMatrix(testStrings[3]),
-    8,
-    8,
-    9
-  )}`
-);
+// console.log(
+//   `Check Matrix Region Validation: ${solver.checkRegion(
+//     solver.generateMatrix(testStrings[3]),
+//     8,
+//     8,
+//     9
+//   )}`
+// );
 // console.log(
 //   solver.solve(
 //     "..9..5.1.85.4....2432......1...69.83.9.....6.62.71...9..a....1945....4.37.4.3..6.."
