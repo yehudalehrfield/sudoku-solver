@@ -10,12 +10,17 @@ module.exports = function (app) {
 
   app.route("/api/check").post((req, res) => {
     let { puzzle, coordinate, value } = req.body;
+    // check for missing field(s)
     if (!puzzle || !coordinate || !value)
       res.json({ error: "Required field(s) missing" });
+    // check puzzle validation errors
     else if (solver.validate(puzzle) != true) res.json(solver.validate(puzzle));
+    // check coordinate validation error
     else if (!coordRegex.test(coordinate))
       res.json({ error: "Invalid coordinate" });
+    // check value validation error
     else if (!valRegex.test(value)) res.json({ error: "Invalid value" });
+    // check for valid placement
     else {
       // get row and col
       let row = rowVals[coordinate[0].toUpperCase()];
